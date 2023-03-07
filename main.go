@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
 	"github.com/gorilla/mux"
 )
 
@@ -98,6 +101,36 @@ func updateArticle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GetRunningContainers(w http.ResponseWriter, r *http.Request) {
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		panic(err)
+	}
+
+	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, container := range containers {
+		fmt.Printf("%s %s\n", container.ID[:10], container.Image)
+	}
+}
+
+func StartContainer(w http.ResponseWriter, r *http.Request) {
+
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx := context.Background()
+
+	if err := cli.ContainerStart(ctx, "ffd3eee28542ef5089b75b4ebd17bc58fab33646d29ca37024ac2dbc0bb2d127", types.ContainerStartOptions{}); err != nil {
+		panic(err)
+	}
+}
+
 func handleRequests() {
 	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -108,6 +141,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/article", createNewArticle).Methods("POST")
 	myRouter.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
 	myRouter.HandleFunc("/article/{id}", updateArticle).Methods("PUT")
+	myRouter.HandleFunc("/running", GetRunningContainers)
+	myRouter.HandleFunc("/start/{id}", StartContainer)
 
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
