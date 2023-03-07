@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/gorilla/mux"
 )
@@ -117,6 +120,33 @@ func GetRunningContainers(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func CreateNewContainer(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		panic(err)
+	}
+	defer cli.Close()
+
+	reader, err := cli.ImagePull(ctx, "docker.io/library/alpine", types.ImagePullOptions{})
+	if err != nil {
+		panic(err)
+	}
+	io.Copy(os.Stdout, reader)
+
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
+		Image: "alpine",
+		Cmd:   []string{"echo", "hello world"},
+	}, nil, nil, nil, "")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		panic(err)
+	}
+}
+
 func StartContainer(w http.ResponseWriter, r *http.Request) {
 
 	cli, err := client.NewClientWithOpts(client.FromEnv)
@@ -142,7 +172,8 @@ func handleRequests() {
 	myRouter.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
 	myRouter.HandleFunc("/article/{id}", updateArticle).Methods("PUT")
 	myRouter.HandleFunc("/running", GetRunningContainers)
-	myRouter.HandleFunc("/start/{id}", StartContainer)
+	myRouter.HandleFunc("/create", CreateNewContainer)
+	myRouter.HandleFunc("/start", StartContainer)
 
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
