@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -161,6 +162,41 @@ func StartContainer(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type IDResponse struct {
+
+	// The id of the newly created object.
+	// Required: true
+	ID string `json:"Id"`
+}
+
+//var Poep IDResponse
+
+func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: cmd")
+
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		panic(err)
+	}
+
+	respIdExecCreate, err := cli.ContainerExecCreate(context.Background(), "f7764fc7ff6082b84c95a7d8652509c854644f8e4a4e5d834c355c6006841879", types.ExecConfig{
+		User:       "root",
+		Privileged: true,
+		Cmd:        []string{"wine", "mt5setup.exe"},
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+	respId, err := cli.ContainerExecAttach(context.Background(), respIdExecCreate.ID, types.ExecStartCheck{})
+	if err != nil {
+		fmt.Println(err)
+	}
+	scanner := bufio.NewScanner(respId.Reader)
+	for scanner.Scan() {
+		fmt.Println("output")
+	}
+}
+
 func handleRequests() {
 	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -174,6 +210,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/running", GetRunningContainers)
 	myRouter.HandleFunc("/create", CreateNewContainer)
 	myRouter.HandleFunc("/start", StartContainer)
+	myRouter.HandleFunc("/cmd", ExecuteCmd)
 
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
