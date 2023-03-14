@@ -182,7 +182,14 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 	respIdExecCreate, err := cli.ContainerExecCreate(context.Background(), "f7764fc7ff6082b84c95a7d8652509c854644f8e4a4e5d834c355c6006841879", types.ExecConfig{
 		User:       "root",
 		Privileged: true,
-		Cmd:        []string{"wine", "mt5setup.exe"},
+		Cmd: []string{
+			"cd", "..", "&&",
+			"cd", ".wine", "&&",
+			"cd", "drive_c", "&&",
+			"cd", "'Program Files'", "&&",
+			"cd", "'MetaTrader 5'", "&&",
+			"wine", "terminal.exe",
+		},
 	})
 	if err != nil {
 		fmt.Println(err)
