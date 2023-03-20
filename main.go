@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -183,25 +182,21 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 		User:       "root",
 		Privileged: true,
 		Cmd: []string{
-			"cd", "..", "&&",
-			"cd", ".wine", "&&",
-			"cd", "drive_c", "&&",
-			"cd", "'Program Files'", "&&",
-			"cd", "'MetaTrader 5'", "&&",
-			"wine", "terminal.exe",
+			"sh", "-c", "cd ~/.wine/drive_c/'Program Files'/'MetaTrader 5' && wine terminal.exe",
 		},
 	})
 	if err != nil {
 		fmt.Println(err)
 	}
-	respId, err := cli.ContainerExecAttach(context.Background(), respIdExecCreate.ID, types.ExecStartCheck{})
+
+	response, err := cli.ContainerExecAttach(context.Background(), respIdExecCreate.ID, types.ExecStartCheck{})
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
-	scanner := bufio.NewScanner(respId.Reader)
-	for scanner.Scan() {
-		fmt.Println("output")
-	}
+	defer response.Close()
+
+	data, _ := ioutil.ReadAll(response.Reader)
+	fmt.Println(string(data))
 }
 
 func handleRequests() {
