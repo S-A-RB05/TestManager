@@ -8,8 +8,8 @@ RUN go mod download
 
 COPY *.go ./
 
-RUN go build -o /StratService
+RUN go build -o /TestManager
 
 EXPOSE 9999
 
-CMD [ "/StratService" ]
+CMD [ "/TestManager" ]
