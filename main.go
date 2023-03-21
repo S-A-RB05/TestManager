@@ -156,7 +156,7 @@ func StartContainer(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 
-	if err := cli.ContainerStart(ctx, "ffd3eee28542ef5089b75b4ebd17bc58fab33646d29ca37024ac2dbc0bb2d127", types.ContainerStartOptions{}); err != nil {
+	if err := cli.ContainerStart(ctx, "f7764fc7ff6082b84c95a7d8652509c854644f8e4a4e5d834c355c6006841879", types.ContainerStartOptions{}); err != nil {
 		panic(err)
 	}
 }
@@ -167,8 +167,6 @@ type IDResponse struct {
 	// Required: true
 	ID string `json:"Id"`
 }
-
-//var Poep IDResponse
 
 func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: cmd")
