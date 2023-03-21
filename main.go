@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -18,92 +17,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Article struct {
-	Id      string `json:"Id"`
-	Title   string `json:"Title"`
-	Desc    string `json:"desc"`
-	Content string `json:"content"`
-}
-
-// let's declare a global Articles array
-// that we can then populate in our main function
-// to simulate a databas
-var Articles []Article
-
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
 	fmt.Println("Endpoint Hit: homePage")
-}
-
-func returnAllArticles(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Endpoint Hit: returnAllArticles")
-	json.NewEncoder(w).Encode(Articles)
-}
-
-func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["id"]
-
-	// Loop over all of our Articles
-	// if the article.Id equals the key we pass in
-	// return the article encoded as JSON
-	for _, article := range Articles {
-		if article.Id == key {
-			json.NewEncoder(w).Encode(article)
-		}
-	}
-}
-
-func createNewArticle(w http.ResponseWriter, r *http.Request) {
-	// get the body of our POST request
-	// unmarshal this into a new Article struct
-	// append this to our Articles array.
-	reqBody, _ := ioutil.ReadAll(r.Body)
-	var article Article
-	json.Unmarshal(reqBody, &article)
-	// update our global Articles array to include
-	// our new Article
-	Articles = append(Articles, article)
-
-	json.NewEncoder(w).Encode(article)
-}
-
-func deleteArticle(w http.ResponseWriter, r *http.Request) {
-	// once again, we will need to parse the path parameters
-	vars := mux.Vars(r)
-	// we will need to extract the `id` of the article we
-	// wish to delete
-	id := vars["id"]
-
-	// we then need to loop through all our articles
-	for index, article := range Articles {
-		// if our id path parameter matches one of our
-		// articles
-		if article.Id == id {
-			// updates our Articles array to remove the
-			// article
-			Articles = append(Articles[:index], Articles[index+1:]...)
-		}
-	}
-
-}
-
-func updateArticle(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-	var updatedEvent Article
-	reqBody, _ := ioutil.ReadAll(r.Body)
-	json.Unmarshal(reqBody, &updatedEvent)
-	for i, article := range Articles {
-		if article.Id == id {
-
-			article.Title = updatedEvent.Title
-			article.Desc = updatedEvent.Desc
-			article.Content = updatedEvent.Content
-			Articles[i] = article
-			json.NewEncoder(w).Encode(article)
-		}
-	}
 }
 
 func GetRunningContainers(w http.ResponseWriter, r *http.Request) {
@@ -161,13 +77,6 @@ func StartContainer(w http.ResponseWriter, r *http.Request) {
 	if err := cli.ContainerStart(ctx, "0be914e5052a28459884fc535507751c57337e7a09a413c08c32b578b984b000", types.ContainerStartOptions{}); err != nil {
 		panic(err)
 	}
-}
-
-type IDResponse struct {
-
-	// The id of the newly created object.
-	// Required: true
-	ID string `json:"Id"`
 }
 
 func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
@@ -298,16 +207,41 @@ func DecodeBase64(w http.ResponseWriter, r *http.Request) {
 	io.Copy(os.Stdout, f)
 }
 
+func GenerateConfig() {
+	// Create a new file to write the configuration settings to
+	file, err := os.Create("config.ini")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	// Write the configuration settings to the file
+	_, err = file.WriteString("[Common]\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	_, err = file.WriteString("Login=123456\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	_, err = file.WriteString("Password=password\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Print a success message
+	fmt.Println("config.ini file generated successfully")
+}
+
 func handleRequests() {
 	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
 	// replace http.HandleFunc with myRouter.HandleFunc
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/all", returnAllArticles)
-	myRouter.HandleFunc("/article/{id}", returnSingleArticle)
-	myRouter.HandleFunc("/article", createNewArticle).Methods("POST")
-	myRouter.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
-	myRouter.HandleFunc("/article/{id}", updateArticle).Methods("PUT")
 	myRouter.HandleFunc("/running", GetRunningContainers)
 	myRouter.HandleFunc("/create", CreateNewContainer)
 	myRouter.HandleFunc("/start", StartContainer)
@@ -321,10 +255,6 @@ func handleRequests() {
 }
 
 func main() {
-	Articles = []Article{
-		{Id: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
-		{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
-	}
 	handleRequests()
 	receive.Strat()
 }
