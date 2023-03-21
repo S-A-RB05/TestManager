@@ -91,7 +91,7 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 		User:       "root",
 		Privileged: true,
 		Cmd: []string{
-			"sh", "-c", "wine terminal.exe",
+			"sh", "-c", "wine terminal.exe  /config:'Report\tester.ini'",
 		},
 	})
 	if err != nil {
@@ -207,7 +207,7 @@ func DecodeBase64(w http.ResponseWriter, r *http.Request) {
 	io.Copy(os.Stdout, f)
 }
 
-func GenerateConfig() {
+func GenerateConfig(w http.ResponseWriter, r *http.Request) {
 	// Create a new file to write the configuration settings to
 	file, err := os.Create("config.ini")
 	if err != nil {
@@ -233,6 +233,101 @@ func GenerateConfig() {
 		return
 	}
 
+	// Write the configuration settings to the file
+	_, err = file.WriteString("[Tester]\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Expert=Examples\\MACD\\MACD Sample\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Symbol=EURUSD\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Period=H1\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Deposit=10000\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Leverage=1:100\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Model=0\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("ExecutionMode=1\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Optimization=0\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("OptimizationCriterion=0\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("FromDate=2011.01.01\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("ToDate=2011.04.01\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Report=test_macd\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("ReplaceReport=1\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("ShutdownTerminal=0\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if err := file.Sync(); err != nil {
+		panic(err)
+	}
+
 	// Print a success message
 	fmt.Println("config.ini file generated successfully")
 }
@@ -247,6 +342,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/start", StartContainer)
 	myRouter.HandleFunc("/cmd", ExecuteCmd)
 	myRouter.HandleFunc("/decode", DecodeBase64)
+	myRouter.HandleFunc("/config", GenerateConfig)
 
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
