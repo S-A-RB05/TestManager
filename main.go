@@ -156,7 +156,7 @@ func StartContainer(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 
-	if err := cli.ContainerStart(ctx, "f7764fc7ff6082b84c95a7d8652509c854644f8e4a4e5d834c355c6006841879", types.ContainerStartOptions{}); err != nil {
+	if err := cli.ContainerStart(ctx, "0be914e5052a28459884fc535507751c57337e7a09a413c08c32b578b984b000", types.ContainerStartOptions{}); err != nil {
 		panic(err)
 	}
 }
@@ -176,11 +176,11 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	respIdExecCreate, err := cli.ContainerExecCreate(context.Background(), "f7764fc7ff6082b84c95a7d8652509c854644f8e4a4e5d834c355c6006841879", types.ExecConfig{
+	respIdExecCreate, err := cli.ContainerExecCreate(context.Background(), "0be914e5052a28459884fc535507751c57337e7a09a413c08c32b578b984b000", types.ExecConfig{
 		User:       "root",
 		Privileged: true,
 		Cmd: []string{
-			"sh", "-c", "cd ~/.wine/drive_c/'Program Files'/'MetaTrader 5' && wine terminal.exe",
+			"sh", "-c", "wine terminal.exe",
 		},
 	})
 	if err != nil {
