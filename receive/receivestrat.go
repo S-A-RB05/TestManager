@@ -1,4 +1,4 @@
-package main
+package receive
 
 import (
 	"io/ioutil"
@@ -15,7 +15,7 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func main() {
+func Strat() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
