@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 
+	"example.com/m/v2/receive"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -325,4 +326,5 @@ func main() {
 		{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
 	}
 	handleRequests()
+	receive.Strat()
 }
