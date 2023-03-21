@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"example.com/m/v2/messaging"
 	"github.com/gorilla/mux"
 )
 
@@ -116,9 +117,10 @@ func handleRequests() {
 }
 
 func main() {
-	Articles = []Article{
-		{Id: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
-		{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
-	}
-	handleRequests()
+	// Articles = []Article{
+	// 	{Id: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
+	// 	{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
+	// }
+	// handleRequests()
+	messaging.ConsumeMessage("strat_queue")
 }
