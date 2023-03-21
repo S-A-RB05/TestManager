@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
-	"example.com/m/v2/messaging"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
 	"github.com/gorilla/mux"
 )
 
@@ -99,6 +104,99 @@ func updateArticle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func GetRunningContainers(w http.ResponseWriter, r *http.Request) {
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		panic(err)
+	}
+
+	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, container := range containers {
+		fmt.Printf("%s %s\n", container.ID[:10], container.Image)
+	}
+}
+
+func CreateNewContainer(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		panic(err)
+	}
+	defer cli.Close()
+
+	reader, err := cli.ImagePull(ctx, "docker.io/library/alpine", types.ImagePullOptions{})
+	if err != nil {
+		panic(err)
+	}
+	io.Copy(os.Stdout, reader)
+
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
+		Image: "alpine",
+		Cmd:   []string{"echo", "hello world"},
+	}, nil, nil, nil, "")
+	if err != nil {
+		panic(err)
+	}
+
+	if err := cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
+		panic(err)
+	}
+}
+
+func StartContainer(w http.ResponseWriter, r *http.Request) {
+
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		panic(err)
+	}
+
+	ctx := context.Background()
+
+	if err := cli.ContainerStart(ctx, "0be914e5052a28459884fc535507751c57337e7a09a413c08c32b578b984b000", types.ContainerStartOptions{}); err != nil {
+		panic(err)
+	}
+}
+
+type IDResponse struct {
+
+	// The id of the newly created object.
+	// Required: true
+	ID string `json:"Id"`
+}
+
+func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: cmd")
+
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		panic(err)
+	}
+
+	respIdExecCreate, err := cli.ContainerExecCreate(context.Background(), "0be914e5052a28459884fc535507751c57337e7a09a413c08c32b578b984b000", types.ExecConfig{
+		User:       "root",
+		Privileged: true,
+		Cmd: []string{
+			"sh", "-c", "wine terminal.exe",
+		},
+	})
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	response, err := cli.ContainerExecAttach(context.Background(), respIdExecCreate.ID, types.ExecStartCheck{})
+	if err != nil {
+		panic(err)
+	}
+	defer response.Close()
+
+	data, _ := ioutil.ReadAll(response.Reader)
+	fmt.Println(string(data))
+}
+
 func handleRequests() {
 	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
@@ -109,6 +207,10 @@ func handleRequests() {
 	myRouter.HandleFunc("/article", createNewArticle).Methods("POST")
 	myRouter.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
 	myRouter.HandleFunc("/article/{id}", updateArticle).Methods("PUT")
+	myRouter.HandleFunc("/running", GetRunningContainers)
+	myRouter.HandleFunc("/create", CreateNewContainer)
+	myRouter.HandleFunc("/start", StartContainer)
+	myRouter.HandleFunc("/cmd", ExecuteCmd)
 
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
@@ -117,10 +219,9 @@ func handleRequests() {
 }
 
 func main() {
-	// Articles = []Article{
-	// 	{Id: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
-	// 	{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
-	// }
-	// handleRequests()
-	messaging.ConsumeMessage("strat_queue")
+	Articles = []Article{
+		{Id: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
+		{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
+	}
+	handleRequests()
 }
