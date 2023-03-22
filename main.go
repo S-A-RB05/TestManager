@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/S-A-RB05/TestManager/messaging"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -219,9 +220,11 @@ func handleRequests() {
 }
 
 func main() {
+	messaging.ConsumeMessage("strat_queue")
 	Articles = []Article{
 		{Id: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
 		{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
 	}
 	handleRequests()
+
 }
