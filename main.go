@@ -91,7 +91,7 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 		User:       "root",
 		Privileged: true,
 		Cmd: []string{
-			"sh", "-c", "wine terminal.exe  /config:'Report\tester.ini'",
+			"sh", "-c", "wine terminal.exe  /config:'Report\\newconfig.ini'",
 		},
 	})
 	if err != nil {
@@ -106,6 +106,8 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 
 	data, _ := ioutil.ReadAll(response.Reader)
 	fmt.Println(string(data))
+
+	fmt.Println("Executed")
 }
 
 var b64 = `Ly8rLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKwovL3wgICAgICAgICAgICAgICAgIEVBMzEzMzcgLSBtdWx0aS1zdHJhdGVneSBhZHZhbmNlZCB0cmF
