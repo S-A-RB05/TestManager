@@ -2,9 +2,10 @@ module example.com/m/v2
 
 go 1.20
 
-require github.com/gorilla/mux v1.8.0
-
 require (
+	github.com/gorilla/mux v1.8.0
+	github.com/joho/godotenv v1.5.1
+	github.com/rabbitmq/amqp091-go v1.7.0
 	github.com/Microsoft/go-winio v0.6.0 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
 	github.com/docker/docker v23.0.1+incompatible // indirect
