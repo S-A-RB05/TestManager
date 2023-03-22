@@ -1,11 +1,10 @@
-module example.com/m/v2
+module github.com/S-A-RB05/TestManager
 
 go 1.20
 
 require (
 	github.com/docker/docker v23.0.1+incompatible
 	github.com/gorilla/mux v1.8.0
-	github.com/joho/godotenv v1.5.1
 	github.com/rabbitmq/amqp091-go v1.7.0
 )
 

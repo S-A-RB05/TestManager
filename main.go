@@ -10,7 +10,8 @@ import (
 	"net/http"
 	"os"
 
-	"example.com/m/v2/receive"
+
+	"github.com/S-A-RB05/TestManager/messaging"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -353,6 +354,6 @@ func handleRequests() {
 }
 
 func main() {
+	messaging.ConsumeMessage("strat_queue")
 	handleRequests()
-	receive.Strat()
 }
