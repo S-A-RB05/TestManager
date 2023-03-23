@@ -19,6 +19,6 @@ jobs:
       uses: docker/build-push-action@v1
       with:
         username: "stockbrood"
-        password: "stockbrood"
+        password: "Stockbrood"
         repository: stockbrood/test_manager
         tags: latest
