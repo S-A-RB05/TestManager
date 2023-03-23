@@ -354,6 +354,6 @@ func handleRequests() {
 }
 
 func main() {
-	messaging.ConsumeMessage("strat_queue")
 	handleRequests()
+	messaging.ConsumeMessage("strat_queue")
 }
