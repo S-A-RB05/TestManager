@@ -1,181 +1,228 @@
 package converter
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-
-	"github.com/Jeffail/gabs"
+	"strconv"
 )
 
-func Test() {
-	data := []byte(`{
-		"employees":{
-		   "protected":false,
-		   "address":{
-			  "street":"22 Saint-Lazare",
-			  "postalCode":"75003",
-			  "city":"Paris",
-			  "countryCode":"FRA",
-			  "country":"France"
-		   },
-		   "employee":[
-			  {
-				 "id":1,
-				 "first_name":"Jeanette",
-				 "last_name":"Penddreth"
-			  },
-			  {
-				 "id":2,
-				 "firstName":"Giavani",
-				 "lastName":"Frediani"
-			  }
-		   ]
-		}
-	 }`)
+type Variables struct {
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	DefaultValue string `json:"defaultValue"`
+	Start        int    `json:"start"`
+	End          int    `json:"end"`
+	Step         int    `json:"step"`
+}
 
-	jsonParsed, err := gabs.ParseJSON(data)
+func Test() {
+	jsonString := `[{
+		"name": "testvar",
+		"type": "int",
+		"defaultValue": "1",
+		"start": 1,
+		"end": 1,
+		"step": 1
+	},{
+		"name": "testvar",
+		"type": "int",
+		"defaultValue": "1",
+		"start": 1,
+		"end": 1,
+		"step": 1
+	},
+	{
+		"name": "testbool",
+		"type": "bool",
+		"defaultValue": "false",
+		"boolValue": false
+	}]`
+
+	var vars []Variables
+	err := json.Unmarshal([]byte(jsonString), &vars)
 	if err != nil {
 		panic(err)
 	}
 
-	// Search JSON
-	fmt.Println("Get value of Protected:\t", jsonParsed.Path("employees.protected").Data())
-	fmt.Println("Get value of Country:\t", jsonParsed.Search("employees", "address", "country").Data())
-	fmt.Println("ID of first employee:\t", jsonParsed.Path("employees.employee.0.id").String())
-	fmt.Println("Check Country Exists:\t", jsonParsed.Exists("employees", "address", "countryCode"))
-
-	// Iterating employee array
-	for _, child := range jsonParsed.Search("employees", "employee").Children() {
-		fmt.Println(child.Data())
-	}
-
-	// Use index in your search
-	for _, child := range jsonParsed.Search("employees", "employee", "0").Children() {
-		fmt.Println(child.Data())
+	for _, variables := range vars {
+		fmt.Printf(
+			"Name: %s, Type: %s, DefaultValue: %s, Start: %d, End: %d, Step: %d\n",
+			variables.Name, variables.Type, variables.DefaultValue, variables.Start, variables.End, variables.Step,
+		)
 	}
 }
 
 func GenerateConfig() {
-		// Create a new file to write the configuration settings to
-		file, err := os.Create("config.ini")
+	// Create a new file to write the configuration settings to
+	file, err := os.Create("config.ini")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+
+	// Write the configuration settings to the file
+	_, err = file.WriteString("[Common]\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	_, err = file.WriteString("Login=123456\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	_, err = file.WriteString("Password=password\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Write the configuration settings to the file
+	_, err = file.WriteString("[Tester]\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Expert=Examples\\MACD\\MACD Sample\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Symbol=EURUSD\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Period=H1\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Deposit=10000\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Leverage=1:100\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Model=0\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("ExecutionMode=1\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Optimization=0\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("OptimizationCriterion=0\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("FromDate=2011.01.01\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("ToDate=2011.04.01\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Report=test_macd\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("ReplaceReport=1\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("ShutdownTerminal=0\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if err := file.Sync(); err != nil {
+		panic(err)
+	}
+
+	// Write the tester inputs
+	_, err = file.WriteString("[TesterInputs]\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	jsonString := `[{
+		"name": "testvar",
+		"type": "int",
+		"defaultValue": "1",
+		"start": 1,
+		"end": 1,
+		"step": 1
+	},{
+		"name": "testvar",
+		"type": "int",
+		"defaultValue": "1",
+		"start": 1,
+		"end": 1,
+		"step": 1
+	},
+	{
+		"name": "testbool",
+		"type": "bool",
+		"defaultValue": "false",
+		"boolValue": false
+	}]`
+
+	var vars []Variables
+	KoenPoenTown := json.Unmarshal([]byte(jsonString), &vars)
+	if KoenPoenTown != nil {
+		panic(KoenPoenTown)
+	}
+
+	for _, variables := range vars {
+
+		_, err = file.WriteString(variables.Name+"="+variables.DefaultValue+"||"+strconv.Itoa(variables.Start)+"||"+strconv.Itoa(variables.Step)+"||"+strconv.Itoa(variables.End)+"||N\n")
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		defer file.Close()
 	
-		// Write the configuration settings to the file
-		_, err = file.WriteString("[Common]\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		_, err = file.WriteString("Login=123456\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		_, err = file.WriteString("Password=password\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		// Write the configuration settings to the file
-		_, err = file.WriteString("[Tester]\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("Expert=Examples\\MACD\\MACD Sample\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("Symbol=EURUSD\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("Period=H1\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("Deposit=10000\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("Leverage=1:100\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("Model=0\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("ExecutionMode=1\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("Optimization=0\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("OptimizationCriterion=0\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("FromDate=2011.01.01\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("ToDate=2011.04.01\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("Report=test_macd\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("ReplaceReport=1\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		_, err = file.WriteString("ShutdownTerminal=0\n")
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	
-		if err := file.Sync(); err != nil {
-			panic(err)
-		}
-	
-		// Print a success message
-		fmt.Println("config.ini file generated successfully")
+		fmt.Printf(
+			"Name: %s, Type: %s, DefaultValue: %s, Start: %d, End: %d, Step: %d\n",
+			variables.Name, variables.Type, variables.DefaultValue, variables.Start, variables.End, variables.Step,
+		)
+	}
+
+	// Print a success message
+	fmt.Println("config.ini file generated successfully")
 }

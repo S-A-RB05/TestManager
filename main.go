@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/S-A-RB05/TestManager/converter"
+	converter "github.com/S-A-RB05/TestManager/converters"
 	"github.com/S-A-RB05/TestManager/messaging"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -331,7 +331,7 @@ func handleRequests() {
 }
 
 func main() {
+	converter.GenerateConfig()
 	handleRequests()
 	messaging.ConsumeMessage("strat_queue")
-	converter.Test()
 }
