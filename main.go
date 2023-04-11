@@ -91,7 +91,7 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 		User:       "root",
 		Privileged: true,
 		Cmd: []string{
-			"sh", "-c", "wine terminal.exe  /config:'Report\\newconfig.ini'",
+			"sh", "-c", "wine terminal.exe  /config:'Report\\confighoi.ini'",
 		},
 	})
 	if err != nil {

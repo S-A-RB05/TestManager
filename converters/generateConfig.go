@@ -55,7 +55,7 @@ func Test() {
 
 func GenerateConfig() {
 	// Create a new file to write the configuration settings to
-	file, err := os.Create("config.ini")
+	file, err := os.Create("D:/test/generated_file.ini")
 	if err != nil {
 		fmt.Println(err)
 		return
