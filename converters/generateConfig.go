@@ -11,13 +11,21 @@ type Variables struct {
 	Name         string `json:"name"`
 	Type         string `json:"type"`
 	DefaultValue string `json:"defaultValue"`
-	Start        int    `json:"start"`
-	End          int    `json:"end"`
-	Step         int    `json:"step"`
+	Start        int    `json:"start,omitempty"`
+	End          int    `json:"end,omitempty"`
+	Step         int    `json:"step,omitempty"`
+	BoolValue    bool   `json:"boolValue,omitempty"`
+}
+
+type Data struct {
+	ID        string      `json:"id"`
+	Variables []Variables `json:"variables"`
 }
 
 func Test() {
-	jsonString := `[{
+	jsonString := `{
+		"id": "test",  
+		"variables":[{
 		"name": "testvar",
 		"type": "int",
 		"defaultValue": "1",
@@ -37,25 +45,60 @@ func Test() {
 		"type": "bool",
 		"defaultValue": "false",
 		"boolValue": false
-	}]`
+	}]
+}`
 
-	var vars []Variables
-	err := json.Unmarshal([]byte(jsonString), &vars)
+	var data Data
+	err := json.Unmarshal([]byte(jsonString), &data)
 	if err != nil {
 		panic(err)
 	}
 
-	for _, variables := range vars {
-		fmt.Printf(
-			"Name: %s, Type: %s, DefaultValue: %s, Start: %d, End: %d, Step: %d\n",
-			variables.Name, variables.Type, variables.DefaultValue, variables.Start, variables.End, variables.Step,
-		)
+	fmt.Println("ID:", data.ID)
+	for _, v := range data.Variables {
+		fmt.Printf("Name: %s, Type: %s, DefaultValue: %s\n", v.Name, v.Type, v.DefaultValue)
+		if v.Type == "int" {
+			fmt.Printf("Start: %d, End: %d, Step: %d\n", v.Start, v.End, v.Step)
+		} else if v.Type == "bool" {
+			fmt.Printf("BoolValue: %t\n", v.BoolValue)
+		}
 	}
 }
 
 func GenerateConfig() {
+	jsonString := `{
+		"id": "test",  
+		"variables":[{
+		"name": "testvar",
+		"type": "int",
+		"defaultValue": "1",
+		"start": 1,
+		"end": 1,
+		"step": 1
+	},{
+		"name": "testvar",
+		"type": "int",
+		"defaultValue": "1",
+		"start": 1,
+		"end": 1,
+		"step": 1
+	},
+	{
+		"name": "testbool",
+		"type": "bool",
+		"defaultValue": "false",
+		"boolValue": false
+	}]
+}`
+
+	var data Data
+	err := json.Unmarshal([]byte(jsonString), &data)
+	if err != nil {
+		panic(err)
+	}
+
 	// Create a new file to write the configuration settings to
-	file, err := os.Create("D:/test/generated_file.ini")
+	file, err := os.Create("config.ini")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -86,7 +129,7 @@ func GenerateConfig() {
 		return
 	}
 
-	_, err = file.WriteString("Expert=Examples\\MACD\\MACD Sample\n")
+	_, err = file.WriteString("Expert=" + data.ID + "\n")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -181,46 +224,23 @@ func GenerateConfig() {
 		return
 	}
 
-	jsonString := `[{
-		"name": "testvar",
-		"type": "int",
-		"defaultValue": "1",
-		"start": 1,
-		"end": 1,
-		"step": 1
-	},{
-		"name": "testvar",
-		"type": "int",
-		"defaultValue": "1",
-		"start": 1,
-		"end": 1,
-		"step": 1
-	},
-	{
-		"name": "testbool",
-		"type": "bool",
-		"defaultValue": "false",
-		"boolValue": false
-	}]`
-
-	var vars []Variables
-	KoenPoenTown := json.Unmarshal([]byte(jsonString), &vars)
-	if KoenPoenTown != nil {
-		panic(KoenPoenTown)
-	}
-
-	for _, variables := range vars {
-
-		_, err = file.WriteString(variables.Name+"="+variables.DefaultValue+"||"+strconv.Itoa(variables.Start)+"||"+strconv.Itoa(variables.Step)+"||"+strconv.Itoa(variables.End)+"||N\n")
-		if err != nil {
-			fmt.Println(err)
-			return
+	for _, v := range data.Variables {
+		fmt.Printf("Name: %s, Type: %s, DefaultValue: %s\n", v.Name, v.Type, v.DefaultValue)
+		if v.Type == "int" {
+			_, err = file.WriteString(v.Name + "=" + v.DefaultValue + "||" + strconv.Itoa(v.Start) + "||" + strconv.Itoa(v.Step) + "||" + strconv.Itoa(v.End) + "||N\n")
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Printf("Start: %d, End: %d, Step: %d\n", v.Start, v.End, v.Step)
+		} else if v.Type == "bool" {
+			_, err = file.WriteString(v.Name + "=" + v.DefaultValue + "||" + strconv.FormatBool(v.BoolValue) + "||0||" + strconv.Itoa(v.End) + "||N\n")
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Printf("BoolValue: %t\n", v.BoolValue)
 		}
-	
-		fmt.Printf(
-			"Name: %s, Type: %s, DefaultValue: %s, Start: %d, End: %d, Step: %d\n",
-			variables.Name, variables.Type, variables.DefaultValue, variables.Start, variables.End, variables.Step,
-		)
 	}
 
 	// Print a success message

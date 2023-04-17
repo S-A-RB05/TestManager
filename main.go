@@ -82,16 +82,16 @@ func StartContainer(w http.ResponseWriter, r *http.Request) {
 func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: cmd")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv)
+	cli, err := client.NewClientWithOpts(client.WithVersion("1.41"))
 	if err != nil {
 		panic(err)
 	}
 
-	respIdExecCreate, err := cli.ContainerExecCreate(context.Background(), "0be914e5052a28459884fc535507751c57337e7a09a413c08c32b578b984b000", types.ExecConfig{
+	respIdExecCreate, err := cli.ContainerExecCreate(context.Background(), "e07a8c609ace20685d357345e40df43868ce5ee628744c79076ec58d42e1eed2", types.ExecConfig{
 		User:       "root",
 		Privileged: true,
 		Cmd: []string{
-			"sh", "-c", "wine terminal.exe  /config:'Report\\confighoi.ini'",
+			"sh", "-c", "xvfb-run wine terminal.exe  /config:'Report\\confighoi.ini'",
 		},
 	})
 	if err != nil {
@@ -187,146 +187,16 @@ func DecodeBase64(w http.ResponseWriter, r *http.Request) {
 	converter.DecodeBase64(b64)
 }
 
-func GenerateConfig(w http.ResponseWriter, r *http.Request) {
-	// Create a new file to write the configuration settings to
-	file, err := os.Create("config.ini")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	defer file.Close()
-
-	// Write the configuration settings to the file
-	_, err = file.WriteString("[Common]\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	_, err = file.WriteString("Login=123456\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	_, err = file.WriteString("Password=password\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// Write the configuration settings to the file
-	_, err = file.WriteString("[Tester]\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("Expert=Examples\\MACD\\MACD Sample\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("Symbol=EURUSD\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("Period=H1\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("Deposit=10000\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("Leverage=1:100\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("Model=0\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("ExecutionMode=1\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("Optimization=0\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("OptimizationCriterion=0\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("FromDate=2011.01.01\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("ToDate=2011.04.01\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("Report=test_macd\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("ReplaceReport=1\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	_, err = file.WriteString("ShutdownTerminal=0\n")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	if err := file.Sync(); err != nil {
-		panic(err)
-	}
-
-	// Print a success message
-	fmt.Println("config.ini file generated successfully")
-}
-
 func handleRequests() {
-	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
-	// replace http.HandleFunc with myRouter.HandleFunc
+
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/running", GetRunningContainers)
 	myRouter.HandleFunc("/create", CreateNewContainer)
 	myRouter.HandleFunc("/start", StartContainer)
 	myRouter.HandleFunc("/cmd", ExecuteCmd)
 	myRouter.HandleFunc("/decode", DecodeBase64)
-	myRouter.HandleFunc("/config", GenerateConfig)
 
-	// finally, instead of passing in nil, we want
-	// to pass in our newly created router as the second
-	// argument
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
