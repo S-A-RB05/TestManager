@@ -201,6 +201,7 @@ func handleRequests() {
 }
 
 func main() {
+	messaging.ProduceMessage("id", "q.getStrat")
 	converter.GenerateConfig()
 	handleRequests()
 	messaging.ConsumeMessage("strat_queue")
