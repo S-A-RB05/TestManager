@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/S-A-RB05/TestManager/models"
@@ -18,7 +19,7 @@ var mongoClient mongo.Client = newClient()
 
 // ----Create----
 func insertStrat(strat models.Strategy) {
-	stratCollection := mongoClient.Database("testing").Collection("strategies")
+	stratCollection := mongoClient.Database("stockbrood_testmanager").Collection("strategies")
 	strat.Created = time.Now()
 	_, err := stratCollection.InsertOne(context.TODO(), strat)
 	if err != nil {
@@ -27,7 +28,7 @@ func insertStrat(strat models.Strategy) {
 	}
 
 	// return the ID of the newly inserted script
-	//fmt.Fprintf(w, "New strategy inserted named: %s", strat.Name)
+	log.Printf("inserted")
 }
 
 //----Read----
@@ -87,7 +88,7 @@ func readSingleStrat(id string) (value primitive.M) {
 
 // other
 func newClient() (value mongo.Client) {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb+srv://stockbrood:admin@stockbrood.sifn3lq.mongodb.net/stockbrood_testmanager"))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb+srv://stockbrood:admin@stockbrood.sifn3lq.mongodb.net/test"))
 	if err != nil {
 		panic(err)
 	}
