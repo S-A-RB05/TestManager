@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"time"
 
+	"github.com/S-A-RB05/TestManager/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -17,17 +17,17 @@ import (
 var mongoClient mongo.Client = newClient()
 
 // ----Create----
-func insertStrat(strat Strategy, w http.ResponseWriter) {
+func insertStrat(strat models.Strategy) {
 	stratCollection := mongoClient.Database("testing").Collection("strategies")
 	strat.Created = time.Now()
 	_, err := stratCollection.InsertOne(context.TODO(), strat)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		panic(err)
+		//return
 	}
 
 	// return the ID of the newly inserted script
-	fmt.Fprintf(w, "New strategy inserted named: %s", strat.Name)
+	//fmt.Fprintf(w, "New strategy inserted named: %s", strat.Name)
 }
 
 //----Read----
@@ -87,7 +87,7 @@ func readSingleStrat(id string) (value primitive.M) {
 
 // other
 func newClient() (value mongo.Client) {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb+srv://stockbrood:admin@stockbrood.sifn3lq.mongodb.net/test"))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb+srv://stockbrood:admin@stockbrood.sifn3lq.mongodb.net/stockbrood_testmanager"))
 	if err != nil {
 		panic(err)
 	}

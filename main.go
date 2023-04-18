@@ -243,9 +243,10 @@ func handleRequests() {
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
+
+
 func main() {
-	messaging.ProduceMessage("id", "q.getStrat")
+	messaging.ConsumeMessage("q.syncStrat", insertStrat)
 	converter.GenerateConfigDefault()
 	handleRequests()
-	messaging.ConsumeMessage("strat_queue")
 }

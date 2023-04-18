@@ -1,12 +1,16 @@
 package messaging
 
 import (
+	"encoding/json"
 	"log"
 
+	"github.com/S-A-RB05/TestManager/models"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func ConsumeMessage(queue string) {
+type Callback func(models.Strategy)
+
+func ConsumeMessage(queue string, callback Callback) {
 	conn, err := amqp.Dial("amqps://tnhdeowx:tInXH7wKtKdyn-v97fZ_HGM5XmHsDTNl@rattlesnake.rmq.cloudamqp.com/tnhdeowx")
 	FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -41,6 +45,13 @@ func ConsumeMessage(queue string) {
 	go func() {
 		for d := range msgs {
 			log.Printf("Received a message: %s", d.Body)
+			// Unmarshal the byte slice into a struct
+			var strat models.Strategy
+			err := json.Unmarshal(d.Body, &strat)
+			if err != nil {
+				panic(err)
+			}
+			callback(strat)
 		}
 	}()
 
