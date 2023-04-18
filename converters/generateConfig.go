@@ -7,19 +7,19 @@ import (
 	"strconv"
 )
 
-type Variables struct {
+type Variable struct {
 	Name         string `json:"name"`
 	Type         string `json:"type"`
 	DefaultValue string `json:"defaultValue"`
-	Start        int    `json:"start,omitempty"`
-	End          int    `json:"end,omitempty"`
-	Step         int    `json:"step,omitempty"`
+	Start        float32    `json:"start,omitempty"`
+	End          float32    `json:"end,omitempty"`
+	Step         float32    `json:"step,omitempty"`
 	BoolValue    bool   `json:"boolValue,omitempty"`
 }
 
 type Data struct {
 	ID        string      `json:"id"`
-	Variables []Variables `json:"variables"`
+	Variables []Variable `json:"variables"`
 }
 
 func Test() {
@@ -65,7 +65,7 @@ func Test() {
 	}
 }
 
-func GenerateConfig() {
+func GenerateConfigDefault() {
 	jsonString := `{
 		"id": "test",  
 		"variables":[{
@@ -91,11 +91,15 @@ func GenerateConfig() {
 	}]
 }`
 
-	var data Data
-	err := json.Unmarshal([]byte(jsonString), &data)
-	if err != nil {
-		panic(err)
-	}
+var data Data
+err := json.Unmarshal([]byte(jsonString), &data)
+if err != nil {
+	panic(err)
+}
+GenerateConfig(data);
+}
+
+func GenerateConfig(data Data) {
 
 	// Create a new file to write the configuration settings to
 	file, err := os.Create("config.ini")
@@ -227,14 +231,14 @@ func GenerateConfig() {
 	for _, v := range data.Variables {
 		fmt.Printf("Name: %s, Type: %s, DefaultValue: %s\n", v.Name, v.Type, v.DefaultValue)
 		if v.Type == "int" {
-			_, err = file.WriteString(v.Name + "=" + v.DefaultValue + "||" + strconv.Itoa(v.Start) + "||" + strconv.Itoa(v.Step) + "||" + strconv.Itoa(v.End) + "||N\n")
+			_, err = file.WriteString(v.Name + "=" + v.DefaultValue + "||" + strconv.FormatFloat(float64(v.Start), 'f', -1, 32) + "||" + strconv.FormatFloat(float64(v.Step), 'f', -1, 32) + "||" + strconv.FormatFloat(float64(v.End), 'f', -1, 32) + "||N\n")
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
 			fmt.Printf("Start: %d, End: %d, Step: %d\n", v.Start, v.End, v.Step)
 		} else if v.Type == "bool" {
-			_, err = file.WriteString(v.Name + "=" + v.DefaultValue + "||" + strconv.FormatBool(v.BoolValue) + "||0||" + strconv.Itoa(v.End) + "||N\n")
+			_, err = file.WriteString(v.Name + "=" + v.DefaultValue + "||" + strconv.FormatBool(v.BoolValue) + "||0||" + strconv.FormatBool(!v.BoolValue) + "||N\n")
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -244,5 +248,5 @@ func GenerateConfig() {
 	}
 
 	// Print a success message
-	fmt.Println("config.ini file generated successfully")
+	fmt.Println("config.ini file generated successfully for strategy with id: " + data.ID)
 }

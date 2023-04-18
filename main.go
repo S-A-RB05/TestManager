@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -110,6 +111,22 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Executed")
 }
 
+func UpdateConfig(w http.ResponseWriter, r *http.Request){
+	body := r.Body
+	fmt.Println("Updating config")
+	// parse the request body into a Strategy struct
+	var data converter.Data;
+	err := json.NewDecoder(body).Decode(&data)
+	fmt.Println(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err)
+		return
+	}
+
+	converter.GenerateConfig(data)
+}
+
 var b64 = `Ly8rLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKwovL3wgICAgICAgICAgICAgICAgIEVBMzEzMzcgLSBtdWx0aS1zdHJhdGVneSBhZHZhbmNlZCB0cmF
 kaW5nIHJvYm90LiB8Ci8vfCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIENvcHlyaWdodCAyMDE2LTIwMjIsIEVBMzEzMzcgTHRkIHwKLy98ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaHR0cHM6Ly9na
 XRodWIuY29tL0VBMzEzMzcgfAovLystLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0rCgovKgogKiAgVGhpcyBmaWxlIGlzIGZyZWUgc29mdHdhcmU6IHlvdSBjYW4gcmV
@@ -187,8 +204,33 @@ func DecodeBase64(w http.ResponseWriter, r *http.Request) {
 	converter.DecodeBase64(b64)
 }
 
+// CORS Middleware
+func CORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// Set headers
+		w.Header().Set("Access-Control-Allow-Headers:", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "*")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		fmt.Println("ok")
+
+		// Next
+		next.ServeHTTP(w, r)
+		//return
+	})
+
+}
+
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
+
+	myRouter.Use(CORS)
 
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/running", GetRunningContainers)
@@ -196,12 +238,13 @@ func handleRequests() {
 	myRouter.HandleFunc("/start", StartContainer)
 	myRouter.HandleFunc("/cmd", ExecuteCmd)
 	myRouter.HandleFunc("/decode", DecodeBase64)
+	myRouter.HandleFunc("/updateconfig", UpdateConfig)
 
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
 func main() {
-	converter.GenerateConfig()
+	converter.GenerateConfigDefault()
 	handleRequests()
 	messaging.ConsumeMessage("strat_queue")
 }
