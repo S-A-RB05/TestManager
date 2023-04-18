@@ -111,11 +111,11 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Executed")
 }
 
-func UpdateConfig(w http.ResponseWriter, r *http.Request){
+func UpdateConfig(w http.ResponseWriter, r *http.Request) {
 	body := r.Body
 	fmt.Println("Updating config")
 	// parse the request body into a Strategy struct
-	var data converter.Data;
+	var data converter.Data
 	err := json.NewDecoder(body).Decode(&data)
 	fmt.Println(data)
 	if err != nil {
