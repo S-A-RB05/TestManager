@@ -8,7 +8,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type Callback func(models.Strategy)
+type Callback func(models.StrategyRequest)
 
 func ConsumeMessage(queue string, callback Callback) {
 	conn, err := amqp.Dial("amqps://tnhdeowx:tInXH7wKtKdyn-v97fZ_HGM5XmHsDTNl@rattlesnake.rmq.cloudamqp.com/tnhdeowx")
@@ -51,7 +51,14 @@ func ConsumeMessage(queue string, callback Callback) {
 			if err != nil {
 				panic(err)
 			}
-			callback(strat)
+
+			var mStrat models.StrategyRequest
+
+			mStrat.Name = strat.Name
+			mStrat.Ex = strat.Ex
+			mStrat.Created = strat.Created
+			
+			callback(mStrat)
 		}
 	}()
 

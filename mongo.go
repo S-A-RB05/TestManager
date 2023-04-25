@@ -18,7 +18,7 @@ import (
 var mongoClient mongo.Client = newClient()
 
 // ----Create----
-func insertStrat(strat models.Strategy) {
+func insertStrat(strat models.StrategyRequest) {
 	stratCollection := mongoClient.Database("stockbrood_testmanager").Collection("strategies")
 	strat.Created = time.Now()
 	_, err := stratCollection.InsertOne(context.TODO(), strat)
