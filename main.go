@@ -11,7 +11,7 @@ import (
 	"os"
 
 	converter "github.com/S-A-RB05/TestManager/converters"
-	"github.com/S-A-RB05/TestManager/messaging"
+	kubernetes "github.com/S-A-RB05/TestManager/kubernetes"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -111,11 +111,11 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Executed")
 }
 
-func UpdateConfig(w http.ResponseWriter, r *http.Request){
+func UpdateConfig(w http.ResponseWriter, r *http.Request) {
 	body := r.Body
 	fmt.Println("Updating config")
 	// parse the request body into a Strategy struct
-	var data converter.Data;
+	var data converter.Data
 	err := json.NewDecoder(body).Decode(&data)
 	fmt.Println(data)
 	if err != nil {
@@ -244,7 +244,8 @@ func handleRequests() {
 }
 
 func main() {
-	converter.GenerateConfigDefault()
-	handleRequests()
-	messaging.ConsumeMessage("strat_queue")
+	// converter.GenerateConfigDefault()
+	// handleRequests()
+	// messaging.ConsumeMessage("strat_queue")
+	kubernetes.CreateJob("development", "test1", "")
 }
