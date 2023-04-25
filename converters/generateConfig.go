@@ -5,20 +5,22 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/S-A-RB05/TestManager/models"
 )
 
 type Variable struct {
-	Name         string `json:"name"`
-	Type         string `json:"type"`
-	DefaultValue string `json:"defaultValue"`
-	Start        float32    `json:"start,omitempty"`
-	End          float32    `json:"end,omitempty"`
-	Step         float32    `json:"step,omitempty"`
-	BoolValue    bool   `json:"boolValue,omitempty"`
+	Name         string  `json:"name"`
+	Type         string  `json:"type"`
+	DefaultValue string  `json:"defaultValue"`
+	Start        float32 `json:"start,omitempty"`
+	End          float32 `json:"end,omitempty"`
+	Step         float32 `json:"step,omitempty"`
+	BoolValue    bool    `json:"boolValue,omitempty"`
 }
 
 type Data struct {
-	ID        string      `json:"id"`
+	ID        string     `json:"id"`
 	Variables []Variable `json:"variables"`
 }
 
@@ -91,15 +93,15 @@ func GenerateConfigDefault() {
 	}]
 }`
 
-var data Data
-err := json.Unmarshal([]byte(jsonString), &data)
-if err != nil {
-	panic(err)
-}
-GenerateConfig(data);
+	var data Data
+	err := json.Unmarshal([]byte(jsonString), &data)
+	if err != nil {
+		panic(err)
+	}
+	//GenerateConfig(data);
 }
 
-func GenerateConfig(data Data) {
+func GenerateConfig(data Data, strat models.StrategyRequest) {
 
 	// Create a new file to write the configuration settings to
 	file, err := os.Create("config.ini")
@@ -133,7 +135,7 @@ func GenerateConfig(data Data) {
 		return
 	}
 
-	_, err = file.WriteString("Expert=" + data.ID + "\n")
+	_, err = file.WriteString("Expert=" + strat.Name + "\n")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -199,7 +201,7 @@ func GenerateConfig(data Data) {
 		return
 	}
 
-	_, err = file.WriteString("Report=test_macd\n")
+	_, err = file.WriteString("Report=" + strat.Name + "_report\n")
 	if err != nil {
 		fmt.Println(err)
 		return
