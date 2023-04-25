@@ -9,6 +9,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	converter "github.com/S-A-RB05/TestManager/converters"
 	"github.com/S-A-RB05/TestManager/messaging"
@@ -123,8 +125,9 @@ func UpdateConfig(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 		return
 	}
+	var strat = readSingleStrat(data.ID)
 
-	converter.GenerateConfig(data)
+	converter.GenerateConfig(data, strat)
 }
 
 var b64 = `Ly8rLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tKwovL3wgICAgICAgICAgICAgICAgIEVBMzEzMzcgLSBtdWx0aS1zdHJhdGVneSBhZHZhbmNlZCB0cmF
@@ -243,10 +246,12 @@ func handleRequests() {
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
 
-
-
 func main() {
-	messaging.ConsumeMessage("q.syncStrat", insertStrat)
-	converter.GenerateConfigDefault()
-	handleRequests()
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go handleRequests()
+	go messaging.ConsumeMessage("q.syncStrat", insertStrat)
+	//converter.GenerateConfigDefault()
+	<-stop
 }
