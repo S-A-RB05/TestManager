@@ -6,6 +6,7 @@ import (
 
 	"github.com/S-A-RB05/TestManager/models"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Callback func(models.StrategyRequest)
@@ -44,21 +45,24 @@ func ConsumeMessage(queue string, callback Callback) {
 
 	go func() {
 		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
+			log.Printf("Received a message")
 			// Unmarshal the byte slice into a struct
 			var strat models.Strategy
 			err := json.Unmarshal(d.Body, &strat)
 			if err != nil {
 				panic(err)
 			}
-
-			var mStrat models.StrategyRequest
-
-			mStrat.Name = strat.Name
-			mStrat.Ex = strat.Ex
-			mStrat.Created = strat.Created
-			
-			callback(mStrat)
+			var bStrat models.StrategyRequest
+			id, err := primitive.ObjectIDFromHex(strat.Id)
+			if err != nil {
+				panic(err)
+			}
+			log.Printf("iD: " + strat.Id)
+			bStrat.Id = id
+			bStrat.Name = strat.Name
+			bStrat.Ex = strat.Ex
+			bStrat.Created = strat.Created
+			callback(bStrat)
 		}
 	}()
 
