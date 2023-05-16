@@ -31,6 +31,22 @@ func insertStrat(strat models.StrategyRequest) {
 	log.Printf("inserted")
 }
 
+func insertTest(test models.Test) (id string) {
+	stratCollection := mongoClient.Database("stockbrood_testmanager").Collection("tests")
+	test.Created = time.Now()
+	result, err := stratCollection.InsertOne(context.TODO(), test)
+	if err != nil {
+		panic(err)
+		//return
+	}
+
+	// return the ID of the newly inserted script
+	log.Printf("inserted")
+	// return the ID of the newly inserted script
+	id = result.InsertedID.(primitive.ObjectID).Hex()
+	return id
+}
+
 //----Read----
 
 func readAllStrats() (values []primitive.M) {

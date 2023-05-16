@@ -19,3 +19,9 @@ type StrategyRequest struct {
 	Ex      string             `bson:"ex"`
 	Created time.Time          `bson:"created"`
 }
+
+type Test struct {
+	Id      string    `json:"id"`
+	StratId string    `json:"strat_id"`
+	Created time.Time `json:"created"`
+}

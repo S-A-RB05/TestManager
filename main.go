@@ -110,6 +110,8 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 	data, _ := ioutil.ReadAll(response.Reader)
 	fmt.Println(string(data))
 
+	
+
 	fmt.Println("Executed")
 }
 
