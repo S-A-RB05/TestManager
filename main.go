@@ -14,6 +14,7 @@ import (
 
 	converter "github.com/S-A-RB05/TestManager/converters"
 	"github.com/S-A-RB05/TestManager/messaging"
+	"github.com/S-A-RB05/TestManager/models"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -109,8 +110,6 @@ func ExecuteCmd(w http.ResponseWriter, r *http.Request) {
 
 	data, _ := ioutil.ReadAll(response.Reader)
 	fmt.Println(string(data))
-
-	
 
 	fmt.Println("Executed")
 }
@@ -232,6 +231,32 @@ func CORS(next http.Handler) http.Handler {
 
 }
 
+func runTest(w http.ResponseWriter, r *http.Request) {
+	body := r.Body
+	fmt.Println("Updating config")
+	// parse the request body into a Strategy struct
+	var data converter.Data
+	err := json.NewDecoder(body).Decode(&data)
+	fmt.Println(data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println(err)
+		return
+	}
+	var strat = readSingleStrat(data.ID)
+
+	converter.GenerateConfig(data, strat)
+
+	var test models.Test
+	//TODO: extract userID
+	test.StratId = data.ID
+
+
+	var testId = insertTest(test)
+	
+	fmt.Fprintf(w, testId)
+}
+
 func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 
@@ -244,6 +269,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/cmd", ExecuteCmd)
 	myRouter.HandleFunc("/decode", DecodeBase64)
 	myRouter.HandleFunc("/updateconfig", UpdateConfig)
+	myRouter.HandleFunc("/runTest", runTest)
 
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
 }
