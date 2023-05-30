@@ -15,6 +15,7 @@ import (
 	converter "github.com/S-A-RB05/TestManager/converters"
 	"github.com/S-A-RB05/TestManager/messaging"
 	"github.com/S-A-RB05/TestManager/models"
+	kubernetes "github.com/S-A-RB05/TestManager/kubernetes"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -281,5 +282,6 @@ func main() {
 	go handleRequests()
 	go messaging.ConsumeMessage("q.syncStrat", insertStrat)
 	//converter.GenerateConfigDefault()
+	kubernetes.CreateJob("development", "test1", "")
 	<-stop
 }
