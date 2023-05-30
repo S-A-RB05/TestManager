@@ -1,7 +1,6 @@
 package converter
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -26,83 +25,6 @@ type Data struct {
 	Variables []Variable `json:"variables"`
 }
 
-func Test() {
-	jsonString := `{
-		"id": "test",  
-		"variables":[{
-		"name": "testvar",
-		"type": "int",
-		"defaultValue": "1",
-		"start": 1,
-		"end": 1,
-		"step": 1
-	},{
-		"name": "testvar",
-		"type": "int",
-		"defaultValue": "1",
-		"start": 1,
-		"end": 1,
-		"step": 1
-	},
-	{
-		"name": "testbool",
-		"type": "bool",
-		"defaultValue": "false",
-		"boolValue": false
-	}]
-}`
-
-	var data Data
-	err := json.Unmarshal([]byte(jsonString), &data)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("ID:", data.ID)
-	for _, v := range data.Variables {
-		fmt.Printf("Name: %s, Type: %s, DefaultValue: %s\n", v.Name, v.Type, v.DefaultValue)
-		if v.Type == "int" {
-			fmt.Printf("Start: %d, End: %d, Step: %d\n", v.Start, v.End, v.Step)
-		} else if v.Type == "bool" {
-			fmt.Printf("BoolValue: %t\n", v.BoolValue)
-		}
-	}
-}
-
-func GenerateConfigDefault() {
-	jsonString := `{
-		"id": "test",  
-		"variables":[{
-		"name": "testvar",
-		"type": "int",
-		"defaultValue": "1",
-		"start": 1,
-		"end": 1,
-		"step": 1
-	},{
-		"name": "testvar",
-		"type": "int",
-		"defaultValue": "1",
-		"start": 1,
-		"end": 1,
-		"step": 1
-	},
-	{
-		"name": "testbool",
-		"type": "bool",
-		"defaultValue": "false",
-		"boolValue": false
-	}]
-}`
-
-	var data Data
-	err := json.Unmarshal([]byte(jsonString), &data)
-	if err != nil {
-		panic(err)
-	}
-	//GenerateConfig(data);
-}
-
 func GenerateConfig(data Data, strat models.StrategyRequest) (config []byte) {
 
 	// Create a new file to write the configuration settings to
@@ -119,12 +41,18 @@ func GenerateConfig(data Data, strat models.StrategyRequest) (config []byte) {
 		fmt.Println(err)
 		return
 	}
-	_, err = file.WriteString("Login=123456\n")
+	_, err = file.WriteString("Login=64624\n")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	_, err = file.WriteString("Password=password\n")
+	_, err = file.WriteString("Password=2oqipkri\n")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = file.WriteString("Server=AlbaBrokers-Demo\n")
 	if err != nil {
 		fmt.Println(err)
 		return
