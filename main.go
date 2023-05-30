@@ -249,4 +249,5 @@ func main() {
 	messaging.ConsumeMessage("q.syncStrat", insertStrat)
 	converter.GenerateConfigDefault()
 	handleRequests()
+	//kubernetes.CreateJob("development")
 }
