@@ -166,7 +166,7 @@ func runTest(w http.ResponseWriter, r *http.Request) {
 		fmt.Print(jobError)
 	}
 
-	// Send config to pod 
+	// Send config to pod
 	messaging.ProduceMessage(bytes, "mt5_test")
 
 	// Insert test into DB
