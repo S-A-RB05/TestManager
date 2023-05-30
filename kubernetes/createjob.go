@@ -18,16 +18,16 @@ import (
 
 var mt5_image string = "stockbrood/mt5_nogui"
 
-func CreateJob(namespace string) error {
+func CreateJob(namespace string) (jobId string, err error) {
 	// Load kubeconfig file and create clientset
 	kubeconfigPath := filepath.Join(homedir.HomeDir(), ".kube", "config")
 	kubeconfig, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	clientset, err := kubernetes.NewForConfig(kubeconfig)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Generate a unique job ID
@@ -74,13 +74,13 @@ func CreateJob(namespace string) error {
 	jobClient := clientset.BatchV1().Jobs(namespace)
 	result, err := jobClient.Create(context.Background(), job, metav1.CreateOptions{})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// Print the job name and UID
 	fmt.Printf("Job %s created with UID %s\n", result.Name, result.UID)
 
-	return nil
+	return jobID, err
 }
 
 // GenerateJobID generates a unique job ID based on timestamp and a unique identifier

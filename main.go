@@ -13,9 +13,9 @@ import (
 	"syscall"
 
 	converter "github.com/S-A-RB05/TestManager/converters"
+	kubernetes "github.com/S-A-RB05/TestManager/kubernetes"
 	"github.com/S-A-RB05/TestManager/messaging"
 	"github.com/S-A-RB05/TestManager/models"
-	kubernetes "github.com/S-A-RB05/TestManager/kubernetes"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -246,15 +246,25 @@ func runTest(w http.ResponseWriter, r *http.Request) {
 	}
 	var strat = readSingleStrat(data.ID)
 
-	converter.GenerateConfig(data, strat)
+	bytes := converter.GenerateConfig(data, strat)
 
 	var test models.Test
 	//TODO: extract userID
 	test.StratId = data.ID
 
+	jobId, jobError := kubernetes.CreateJob("development")
+	if jobError != nil {
+		fmt.Print(jobError)
+	}
+
+	fmt.Print(bytes)
+
+	messaging.ProduceMessage(bytes, "mt5_test")
+
+	test.Id = jobId
 
 	var testId = insertTest(test)
-	
+
 	fmt.Fprintf(w, testId)
 }
 
@@ -269,7 +279,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/start", StartContainer)
 	myRouter.HandleFunc("/cmd", ExecuteCmd)
 	myRouter.HandleFunc("/decode", DecodeBase64)
-	myRouter.HandleFunc("/updateconfig", UpdateConfig)
+	myRouter.HandleFunc("/updateconfig", runTest)
 	myRouter.HandleFunc("/runTest", runTest)
 
 	log.Fatal(http.ListenAndServe(":8081", myRouter))
@@ -282,6 +292,6 @@ func main() {
 	go handleRequests()
 	go messaging.ConsumeMessage("q.syncStrat", insertStrat)
 	//converter.GenerateConfigDefault()
-	kubernetes.CreateJob("development", "test1", "")
+	//kubernetes.CreateJob("development")
 	<-stop
 }

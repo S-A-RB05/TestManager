@@ -3,6 +3,8 @@ package converter
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 
@@ -101,7 +103,7 @@ func GenerateConfigDefault() {
 	//GenerateConfig(data);
 }
 
-func GenerateConfig(data Data, strat models.StrategyRequest) {
+func GenerateConfig(data Data, strat models.StrategyRequest) (config []byte) {
 
 	// Create a new file to write the configuration settings to
 	file, err := os.Create("config.ini")
@@ -249,6 +251,13 @@ func GenerateConfig(data Data, strat models.StrategyRequest) {
 		}
 	}
 
+	// Read the file contents into a byte slice
+	fileBytes, err := ioutil.ReadFile("config.ini")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Print a success message
 	fmt.Println("config.ini file generated successfully for strategy with id: " + data.ID)
+	return fileBytes
 }
