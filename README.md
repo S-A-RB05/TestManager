@@ -10,7 +10,53 @@ Method: POST
 Example Usage:
 
 ```
-curl -X POST -H "Content-Type: application/json" -d '{"ID": "exampleID", "data": "exampleData"}' http://localhost:8081/updateconfig
+curl -X POST -H "Content-Type: application/json" -d '
+{
+  "id": "645a46d8d9335b1665d85ef2",
+  "variables": [
+    {
+      "name": "Inp_Signal_MACD_PeriodFast",
+      "type": "int",
+      "defaultValue": "12",
+      "start": 12,
+      "end": 12,
+      "step": 12
+    },
+    {
+      "name": "Inp_Signal_MACD_PeriodSlow",
+      "type": "int",
+      "defaultValue": "24",
+      "start": 24,
+      "end": 24,
+      "step": 24
+    },
+    {
+      "name": "Inp_Signal_MACD_PeriodSignal",
+      "type": "int",
+      "defaultValue": "9",
+      "start": 9,
+      "end": 9,
+      "step": 9
+    },
+    {
+      "name": "Inp_Signal_MACD_TakeProfit",
+      "type": "int",
+      "defaultValue": "50",
+      "start": 50,
+      "end": 50,
+      "step": 50
+    },
+    {
+      "name": "Inp_Signal_MACD_StopLoss",
+      "type": "int",
+      "defaultValue": "20",
+      "start": 20,
+      "end": 20,
+      "step": 20
+    }
+  ]
+}
+' http://localhost:8081/updateconfig
 ```
 
 
