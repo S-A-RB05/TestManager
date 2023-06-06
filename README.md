@@ -14,7 +14,7 @@ curl -X POST -H "Content-Type: application/json" -d '{"ID": "exampleID", "data":
 ```
 
 
-## Instructions for deployment
+## Running application
 
 Start the server by running the Go application in the terminal.
 
