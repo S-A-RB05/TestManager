@@ -65,7 +65,7 @@ func GenerateConfig(data Data, strat models.StrategyRequest) (config []byte) {
 		return
 	}
 
-	_, err = file.WriteString("Expert=" + strat.Name + "\n")
+	_, err = file.WriteString("Expert=/Advisors/" + strat.Name + "\n")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -131,7 +131,7 @@ func GenerateConfig(data Data, strat models.StrategyRequest) (config []byte) {
 		return
 	}
 
-	_, err = file.WriteString("Report=" + strat.Name + "_report\n")
+	_, err = file.WriteString("Report=./Report/tester_report.htm\n")
 	if err != nil {
 		fmt.Println(err)
 		return
