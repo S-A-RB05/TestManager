@@ -11,7 +11,9 @@ import (
 
 type Callback func(models.StrategyRequest)
 
+// Function to consume messages from queue specified in parameter then handle the message using the provided method
 func ConsumeMessage(queue string, callback Callback) {
+	// Connect to RabbitMQ broker
 	conn, err := amqp.Dial("amqps://tnhdeowx:tInXH7wKtKdyn-v97fZ_HGM5XmHsDTNl@rattlesnake.rmq.cloudamqp.com/tnhdeowx")
 	FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -20,6 +22,7 @@ func ConsumeMessage(queue string, callback Callback) {
 	FailOnError(err, "Failed to open a channel")
 	defer ch.Close()
 
+	// Declare queue
 	q, err := ch.QueueDeclare(
 		queue, // name
 		false, // durable
@@ -43,6 +46,7 @@ func ConsumeMessage(queue string, callback Callback) {
 
 	var forever chan struct{}
 
+	// Listen for messages
 	go func() {
 		for d := range msgs {
 			log.Printf("Received a message")

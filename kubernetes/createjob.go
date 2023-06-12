@@ -16,8 +16,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// Docker hub image to start inside job
 var mt5_image string = "stockbrood/mt5_nogui"
 
+// Function to create a job inside a (local) Kubernetes cluster
 func CreateJob(namespace string) (jobId string, err error) {
 	// Load kubeconfig file and create clientset
 	kubeconfigPath := filepath.Join(homedir.HomeDir(), ".kube", "config")
@@ -33,7 +35,7 @@ func CreateJob(namespace string) (jobId string, err error) {
 	// Generate a unique job ID
 	jobID := GenerateJobID()
 
-	// Define the environment variable
+	// Define the environment variable for container to retrieve
 	jobIDEnvVar := corev1.EnvVar{
 		Name:  "JOB_ID",
 		Value: jobID,
