@@ -8,7 +8,9 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
+// Function to produce a message to the specified queue
 func ProduceMessage(message []byte, queue string) {
+	// Connect to RabbitMQ broker
 	conn, err := amqp.Dial("amqps://tnhdeowx:tInXH7wKtKdyn-v97fZ_HGM5XmHsDTNl@rattlesnake.rmq.cloudamqp.com/tnhdeowx")
 	FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
