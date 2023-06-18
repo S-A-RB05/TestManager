@@ -12,6 +12,6 @@ COPY . ./
 
 RUN go build -o /TestManager
 
-EXPOSE 9999
+EXPOSE 8081
 
 CMD [ "/TestManager" ]
