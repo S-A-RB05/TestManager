@@ -4,15 +4,13 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"path/filepath"
 	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
+	"k8s.io/client-go/rest"
 )
 
 // Docker hub image to start inside job
@@ -22,7 +20,7 @@ var mt5Image string = "stockbrood/mt5_nogui"
 func CreateJob(namespace string) (jobId string, err error) {
 	// Create a Kubernetes client using the local configuration
 	fmt.Println("trying to create client from local config")
-	config, err := clientcmd.BuildConfigFromFlags("", filepath.Join(homedir.HomeDir(), ".kube", "config"))
+	config, err := rest.InClusterConfig()
 	if err != nil {
 		fmt.Println("config failed")
 		return "", err
