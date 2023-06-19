@@ -18,12 +18,7 @@ var mt5Image string = "stockbrood/mt5_nogui"
 
 // Function to create a job inside the Kubernetes cluster
 func CreateJob(namespace string) (jobId string, err error) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		return "", err
-	}
-
-	clientset, err := kubernetes.NewForConfig(config)
+	clientset, err := kubernetes.NewForConfig(&rest.Config{})
 	if err != nil {
 		return "", err
 	}
