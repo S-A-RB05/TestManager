@@ -22,7 +22,7 @@ func CreateJob(namespace string) (jobId string, err error) {
 	fmt.Println("trying to create client from local config")
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		fmt.Println("config failed")
+		fmt.Println("Failed to create config:", err)
 		return "", err
 	}
 
@@ -30,19 +30,53 @@ func CreateJob(namespace string) (jobId string, err error) {
 	fmt.Println("trying to create clientset")
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		fmt.Println("clientset failed")
+		fmt.Println("Failed to create clientset:", err)
 		return "", nil
 	}
 
 	// Generate a unique job ID
 	jobID := GenerateJobID()
 
+	job := createJobObject(namespace, jobID)
+
+	fmt.Println("trying to create job ")
+	// Create the job
+	jobClient := clientset.BatchV1().Jobs(namespace)
+	result, err := jobClient.Create(context.Background(), job, metav1.CreateOptions{})
+	if err != nil {
+		fmt.Println("Failed to create job:", err)
+		return "", err
+	}
+
+	// Print the job name and UID
+	fmt.Printf("Job %s created with UID %s\n", result.Name, result.UID)
+
+	return jobID, err
+}
+
+// GenerateJobID generates a unique job ID based on timestamp and a unique identifier
+func GenerateJobID() string {
+	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
+	uniqueID := generateUniqueID(8)
+	return fmt.Sprintf("job-%d-%s", timestamp, uniqueID)
+}
+
+// generateUniqueID generates a random alphanumeric string of the specified length
+func generateUniqueID(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
+}
+
+func createJobObject(namespace string, jobID string) *batchv1.Job {
 	// Define the environment variable for the container to retrieve
 	jobIDEnvVar := corev1.EnvVar{
 		Name:  "JOB_ID",
 		Value: jobID,
 	}
-
 	// Define the job
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -73,35 +107,5 @@ func CreateJob(namespace string) (jobId string, err error) {
 			}(),
 		},
 	}
-
-	fmt.Println("trying to create job ")
-	// Create the job
-	jobClient := clientset.BatchV1().Jobs(namespace)
-	result, err := jobClient.Create(context.Background(), job, metav1.CreateOptions{})
-	if err != nil {
-		fmt.Println("fialed to create job")
-		return "", err
-	}
-
-	// Print the job name and UID
-	fmt.Printf("Job %s created with UID %s\n", result.Name, result.UID)
-
-	return jobID, err
-}
-
-// GenerateJobID generates a unique job ID based on timestamp and a unique identifier
-func GenerateJobID() string {
-	timestamp := time.Now().UnixNano() / int64(time.Millisecond)
-	uniqueID := generateUniqueID(8)
-	return fmt.Sprintf("job-%d-%s", timestamp, uniqueID)
-}
-
-// generateUniqueID generates a random alphanumeric string of the specified length
-func generateUniqueID(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
-	}
-	return string(b)
+	return job
 }
