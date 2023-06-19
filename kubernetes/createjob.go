@@ -3,7 +3,6 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
 	"time"
 
@@ -19,16 +18,16 @@ var mt5Image string = "stockbrood/mt5_nogui"
 
 // Function to create a job inside the Kubernetes cluster
 func CreateJob(namespace string) (jobId string, err error) {
-	// Build the client config from the Minikube configuration
+	// Create a Kubernetes client using the local configuration
 	config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
-		log.Fatal(err)
+		return "", nil
 	}
 
-	// Create the clientset
+	// Create the Kubernetes clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Fatal(err)
+		return "", nil
 	}
 
 	// Generate a unique job ID
