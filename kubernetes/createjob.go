@@ -4,30 +4,26 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"path/filepath"
 	"time"
-
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 // Docker hub image to start inside job
-var mt5_image string = "stockbrood/mt5_nogui"
+var mt5Image string = "stockbrood/mt5_nogui"
 
-// Function to create a job inside a (local) Kubernetes cluster
+// Function to create a job inside the Kubernetes cluster
 func CreateJob(namespace string) (jobId string, err error) {
-	// Load kubeconfig file and create clientset
-	kubeconfigPath := filepath.Join(homedir.HomeDir(), ".kube", "config")
-	kubeconfig, err := clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	config, err := rest.InClusterConfig()
 	if err != nil {
 		return "", err
 	}
-	clientset, err := kubernetes.NewForConfig(kubeconfig)
+
+	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return "", err
 	}
@@ -35,7 +31,7 @@ func CreateJob(namespace string) (jobId string, err error) {
 	// Generate a unique job ID
 	jobID := GenerateJobID()
 
-	// Define the environment variable for container to retrieve
+	// Define the environment variable for the container to retrieve
 	jobIDEnvVar := corev1.EnvVar{
 		Name:  "JOB_ID",
 		Value: jobID,
@@ -56,7 +52,7 @@ func CreateJob(namespace string) (jobId string, err error) {
 					Containers: []corev1.Container{
 						{
 							Name:  "mt5-container",
-							Image: mt5_image,
+							Image: mt5Image,
 							Env: []corev1.EnvVar{
 								jobIDEnvVar,
 							},
