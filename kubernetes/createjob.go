@@ -19,14 +19,18 @@ var mt5Image string = "stockbrood/mt5_nogui"
 // Function to create a job inside the Kubernetes cluster
 func CreateJob(namespace string) (jobId string, err error) {
 	// Create a Kubernetes client using the local configuration
+	fmt.Println("trying to create client from local config")
 	config, err := clientcmd.BuildConfigFromFlags("", clientcmd.RecommendedHomeFile)
 	if err != nil {
+		fmt.Println("client config failed")
 		return "", nil
 	}
 
 	// Create the Kubernetes clientset
+	fmt.Println("trying to create clientset")
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
+		fmt.Println("clientset failed")
 		return "", nil
 	}
 
@@ -70,10 +74,12 @@ func CreateJob(namespace string) (jobId string, err error) {
 		},
 	}
 
+	fmt.Println("trying to create job ")
 	// Create the job
 	jobClient := clientset.BatchV1().Jobs(namespace)
 	result, err := jobClient.Create(context.Background(), job, metav1.CreateOptions{})
 	if err != nil {
+		fmt.Println("fialed to create job")
 		return "", err
 	}
 
